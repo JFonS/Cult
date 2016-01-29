@@ -6,45 +6,41 @@ local jefe, musicSource, bpm, beat, halfBeat, localTime, beatIndex
 function Game:init()
     jefe = {}
     jefe.img = love.graphics.newImage("images/jefe.png")
-    jefe.pos = Vector(-100,-100)
-    jefe.scale = Vector(0.4,0.4)
+    jefe.originalPos = Vector(love.graphics.getWidth()/2,love.graphics.getHeight()/2 + 150)
+    jefe.pos = jefe.originalPos:clone()
+    jefe.scale = Vector(0.6,0.6)
 
     musicSource = love.audio.newSource( "music/level1.wav", "static")
     musicSource:setLooping(true)
     bpm = (16) * 60 / (8)
-    beat = bpm / 60
+    beat = 60 / bpm 
     halfBeat = beat/2
 
-    print("BPM" .. bpm)
     localTime = 0.0
 
 end
 
-function jefeUp()
-	Flux.to(jefe.pos, (beat/10),{y = jefe.pos.y + 20}):ease("quadin"):oncomplete(jefeDown)
-end
-
-function jefeDown()
-	Flux.to(jefe.pos, (beat/2.5),{y = jefe.pos.y - 20}):ease("quadout"):oncomplete(jefeUp)
-end
-
-
-function Game:enter(previous) -- runs every time the state is entered
+function Game:enter(previous) 
 	love.audio.play(musicSource)
-	jefeDown()
 	beatIndex = 0
 end
 
 function Game:update(dt) -- runs every frame
 	localTime = localTime + dt
-	print( beat, halfBeat)
-	local beatDist = math.abs(localTime % halfBeat) / halfBeat
-	jefe.pos.y = -100 + beatDist * 50
+	local moveDist = 15
+	local beatDist = math.abs(localTime % beat) 
+	if beatDist < beat/5*4 then
+		jefe.pos.y = jefe.originalPos.y - (beatDist / ((beat/5)*4)) * moveDist
+	else
+		jefe.pos.y = jefe.originalPos.y - (beat - (beat/5*4)) /(beat/5) * moveDist
+	end
+	
     beatIndex = localTime * bpm * (1/60) * (1)
 end
 
 function Game:draw()
-    love.graphics.draw(jefe.img, jefe.pos.x, jefe.pos.y)
+
+    love.graphics.draw(jefe.img, jefe.pos.x, jefe.pos.y, 0, jefe.scale.x,jefe.scale.y, jefe.img:getWidth()/2, jefe.img:getHeight()/2)
     love.graphics.print("beatIndex: " .. math.floor(beatIndex),10,10)
 end
 
