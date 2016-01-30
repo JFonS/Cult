@@ -11,6 +11,8 @@ local Game = {}
 local jefe, musicSource, bpm, beat, halfBeat, localTime, beatIndex, beatSteps, minions, background, fireImg, blueFireImg, mahand
 local fps = 0
 local handPositions = {}
+local deathTime 
+local death
 
 handPositions.l =  Vector(250,love.graphics.getHeight()-100)
 handPositions.r = Vector(love.graphics.getWidth() - 250,love.graphics.getHeight()-100)
@@ -66,6 +68,8 @@ function Game:init()
   handPositions.lights[1] = new_light(Vector(268,194))
   handPositions.lights[2] = new_light(Vector(402,202))
   handPositions.lights[3] = new_light(Vector(532,208))
+  deathTime = 0.0
+  death = false
 end
 
 function new_light(p)
@@ -161,77 +165,83 @@ end
 
 
 function Game:update(dt) -- runs every frame
-  swingers.update()
-  Flux.update(dt)
-  localTime = localTime + dt
+  if not death then
+    swingers.update()
+    Flux.update(dt)
+    localTime = localTime + dt
 
-  mahand.light.setPosition(love.mouse.getX(), love.mouse.getY())
-  mahand.light.setRange(math.sin(40*localTime%(math.cos(localTime)*21.45))*20+200)
+    mahand.light.setPosition(love.mouse.getX(), love.mouse.getY())
+    mahand.light.setRange(math.sin(40*localTime%(math.cos(localTime)*21.45))*20+200)
 
-  local moveDist = 15
-  local beatDist = math.abs(localTime % beat) 
-  if beatDist < beat/5*4 then
-    jefe.pos.y = jefe.originalPos.y - (beatDist / ((beat/5)*4)) * moveDist
-    minions.pos.y = minions.originalPos.y - (beatDist / ((beat/5)*4)) * moveDist *0.4
-  else
-    jefe.pos.y = jefe.originalPos.y - (beat - (beat/5*4)) /(beat/5) * moveDist
-    minions.pos.y = minions.originalPos.y - (beatDist / ((beat/5)*4)) * moveDist *0.4
-  end
-
-  update_trails(dt)
-
-  local newIndex = math.floor(localTime * bpm * (1/60) * (0.5))
-
-  local indexChanged = newIndex ~= beatIndex
-  beatIndex = newIndex
-
-  if (indexChanged and not completedLastMove) then lose() end
-  local part = beatSteps[math.floor((beatIndex/2)/sequenceLen) + 1]
-  local move = part[beatIndex%4 + 1]
-  if (beatIndex % (sequenceLen*2) < sequenceLen)  then
-    if indexChanged then
-      if move == "l" then
-        hand_move("r","l")
-      elseif move == "r" then
-        hand_move("l","r")
-      elseif move == "u" then
-        hand_move("d","u")
-      elseif move == "d" then
-        hand_move("u","d")
-      elseif move == "c" then
-        hand_circle()
-      end
-    end
-  else
-    if indexChanged then 
-      swingers.start()
-      completedLastMove = move == "none"
+    local moveDist = 15
+    local beatDist = math.abs(localTime % beat) 
+    if beatDist < beat/5*4 then
+      jefe.pos.y = jefe.originalPos.y - (beatDist / ((beat/5)*4)) * moveDist
+      minions.pos.y = minions.originalPos.y - (beatDist / ((beat/5)*4)) * moveDist *0.4
+    else
+      jefe.pos.y = jefe.originalPos.y - (beat - (beat/5*4)) /(beat/5) * moveDist
+      minions.pos.y = minions.originalPos.y - (beatDist / ((beat/5)*4)) * moveDist *0.4
     end
 
-    if swingers.checkGesture() then
-      if move == "c" then
-        if EditDistance({"w","nw","n","ne","e","se","s","sw","s"}, swingers.getExtGesture(),4) >= 4 then
-          lose()
-        else
-          completedLastMove = true
-        end
-      else
-        if move ~= swingers.getGesture() then
-          lose()
-        else
-          completedLastMove = true
+    update_trails(dt)
+
+    local newIndex = math.floor(localTime * bpm * (1/60) * (0.5))
+
+    local indexChanged = newIndex ~= beatIndex
+    beatIndex = newIndex
+
+    if (indexChanged and not completedLastMove) then lose() end
+    local part = beatSteps[math.floor((beatIndex/2)/sequenceLen) + 1]
+    local move = part[beatIndex%4 + 1]
+    if (beatIndex % (sequenceLen*2) < sequenceLen)  then
+      if indexChanged then
+        if move == "l" then
+          hand_move("r","l")
+        elseif move == "r" then
+          hand_move("l","r")
+        elseif move == "u" then
+          hand_move("d","u")
+        elseif move == "d" then
+          hand_move("u","d")
+        elseif move == "c" then
+          hand_circle()
         end
       end
-    end  
+    else
+      if indexChanged then 
+        swingers.start()
+        completedLastMove = move == "none"
+      end
+
+      if swingers.checkGesture() then
+        if move == "c" then
+          if EditDistance({"w","nw","n","ne","e","se","s","sw","s"}, swingers.getExtGesture(),4) >= 4 then
+            lose()
+          else
+            completedLastMove = true
+          end
+        else
+          if move ~= swingers.getGesture() then
+            lose()
+
+          else
+            completedLastMove = true
+          end
+        end
+      end  
+    end
+
+  else
+    deathTime = deathTime + dt
+    if deathTime >= 2 then
+      love.audio.stop(musicSource)
+      Gamestate.switch(Kill)
+    end
   end
-
-
 end
 
 function lose() 
- -- Gamestate.switch(Menu)
-  love.audio.stop(musicSource)
-  Gamestate.switch(Kill)
+  death = true
 end
 
 
