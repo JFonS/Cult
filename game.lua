@@ -5,6 +5,7 @@ require "lib/class"
 require "lib/trailmesh"
 require "lib/postshader"
 require "lib/light"
+require "lib/edit-distance"
 
 local Game = {} 
 local jefe, musicSource, bpm, beat, halfBeat, localTime, beatIndex, beatSteps, minions, background, fireImg, blueFireImg, mahand
@@ -13,9 +14,9 @@ local handPositions = {}
 
 handPositions.l =  Vector(250,love.graphics.getHeight()-100)
 handPositions.r = Vector(love.graphics.getWidth() - 250,love.graphics.getHeight()-100)
-handPositions.u =    Vector(love.graphics.getWidth()/2,450)
+handPositions.u =    Vector(love.graphics.getWidth()/2,300)
 handPositions.d =  Vector(love.graphics.getWidth()/2,750)
-handPositions.idle = Vector(love.graphics.getWidth()/2 - 100,love.graphics.getHeight()/2 + 450)
+handPositions.idle = Vector(love.graphics.getWidth()/2,love.graphics.getHeight()/2 + 350)
 
 function Game:init()
   jefe = {}
@@ -27,8 +28,6 @@ function Game:init()
   jefe.hand.img = love.graphics.newImage("images/liderhand.png")
   jefe.hand.scale = Vector(0.7,0.7)
   jefe.hand.originalPos = handPositions.idle
-
-
 
   minions = {}
   minions.img = love.graphics.newImage("images/minions.png")
@@ -65,8 +64,8 @@ function Game:init()
   handPositions.lights = {}
 
   handPositions.lights[1] = new_light(Vector(268,194))
-  handPositions.lights[2] = new_light(Vector(402,202))-- - halfHandSize) * jefe.hand.scale.x, trail = trailmesh:new(0,0,fireImg,20,0.5,.01)}
-  handPositions.lights[3] = new_light(Vector(532,208))-- - halfHandSize) * jefe.hand.scale.x, trail = trailmesh:new(0,0,fireImg,20,0.5,.01)}
+  handPositions.lights[2] = new_light(Vector(402,202))
+  handPositions.lights[3] = new_light(Vector(532,208))
 end
 
 function new_light(p)
@@ -85,7 +84,7 @@ function Game:enter(previous)
   beatIndex = -1
 
   beatSteps = {
-    {"l","r","u","c"},
+    {"l","r","c","u"},
     {"l","r","u","d"},
     {"r","l","r","u"}}
 
@@ -111,36 +110,40 @@ function new_lights()
 end
 
 function hand_move(start, finish)
-  Flux.to(jefe.hand.pos, gameBeat/5, handPositions[start])
+  Flux.to(jefe.hand.pos, gameBeat/6, handPositions[start])
   :oncomplete(function() 
       jefe.hand.lightOn = true
       new_lights()
     end)
-  :after(gameBeat/5*3,handPositions[finish])
+  :after((gameBeat/6)*4,handPositions[finish])
   :oncomplete(function() jefe.hand.lightOn = false end)
-  :after(gameBeat/5*2,handPositions.idle)
+  :after(gameBeat/7,handPositions.idle)
 end
 
 function hand_circle()
-    
-  local precision = 32
-  --local halfHandSize = Vector(jefe.hand.img:getWidth()/2,jefe.hand.img:getHeight()/2)
+
+  local precision = 16
   local c = Vector(love.graphics.getWidth()/2, love.graphics.getHeight()/2)
   local r = (handPositions.idle - c):len()/2
-  local lastween = nil
+
+  local arcTime = (gameBeat - gameBeat/3)/(precision+0.05)
+
+  local offset = math.pi/2
+  local nx = c.x + r * math.cos(offset)
+  local ny = c.y+200 + r * math.sin(offset)
+
+  local lastween = Flux.to(jefe.hand.pos,gameBeat/6,{x=nx,y=ny})
   for i=0,precision do
-    local a = ((2*math.pi)/precision)*i +math.pi/5
+    local a = ((2*math.pi)/precision)*i + offset
     local nx = c.x + r * math.cos(a)
     local ny = c.y+200 + r * math.sin(a)
-    if lastween == nil then 
-      lastween = Flux.to(jefe.hand.pos,gameBeat/precision-0.05,{x=nx,y=ny})
+    if i == 0 then 
       jefe.hand.lightOn = true
-    new_lights()
-    
-    else lastween = lastween:after(gameBeat/precision,{x=nx,y=ny}) end
-    print (a, nx,ny)
+      new_lights()
+    end
+    lastween = lastween:after(arcTime,{x=nx,y=ny}) 
   end
-  lastween:oncomplete(function()   jefe.hand.lightOn = false end)
+  lastween:oncomplete(function()jefe.hand.lightOn = false end):after(jefe.hand.pos,gameBeat/6,{x=handPositions.idle.x,y=handPositions.idle.y}):oncomplete(function() print("lol")end)
 end
 
 function update_trails(dt) 
@@ -202,14 +205,22 @@ function Game:update(dt) -- runs every frame
   else
     if indexChanged then 
       swingers.start()
-      completedLastMove = false 
+      completedLastMove = move == "none"
     end
 
     if swingers.checkGesture() then
-      if move ~= swingers.getGesture() then
-        lose()
+      if move == "c" then
+        if EditDistance({"w","nw","n","ne","e","se","s","sw","s"}, swingers.getExtGesture(),4) >= 4 then
+          lose()
+        else
+          completedLastMove = true
+        end
       else
-        completedLastMove = true
+        if move ~= swingers.getGesture() then
+          lose()
+        else
+          completedLastMove = true
+        end
       end
     end  
   end
@@ -277,7 +288,7 @@ end
 
 function Game:mousereleased(x,y, mouse_btn)
   if mouse_btn == "l" then
-    mahand.trail = trailmesh:new(love.mouse.getX(),love.mouse.getY(),blueFireImg,10,0.2,.01)
+    mahand.trail = trailmesh:new(love.mouse.getX(),love.mouse.getY(),blueFireImg,10,0.01,.01)
   end
 end
 
