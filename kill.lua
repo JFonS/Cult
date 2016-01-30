@@ -4,12 +4,15 @@
 
 local Kill = {} 
 --local musicSource, localTime, background, offset, titleImg
+local localTime
+local imgactual
+
 --local introTime = 8
 --local titleTime = 5
 --local things = {}
 --local ready = false
 
-function Intro:init()
+function Kill:init()
   background = {}
   background.img = {}
   
@@ -24,44 +27,42 @@ function Intro:init()
 
 
   titleImg = love.graphics.newImage("images/title.png")
+  
 
-  musicSource = love.audio.newSource( "music/level1.wav", "static")
+ -- musicSource = love.audio.newSource( "music/level1.wav", "static")
 
-  musicSource:setLooping(true)
+ -- musicSource:setLooping(true)
 end
 
-function Intro:enter(previous)
-  love.audio.rewind(musicSource)
-  love.audio.play(musicSource)
+function Kill:enter(previous)
+  --love.audio.rewind(musicSource)
+  --love.audio.play(musicSource)
 
   localTime = 0.0
-  things.offset = 0
-  things.titleAlpha = 0
-  things.blackAlpha = 0
-
-  maxOffset = 2800-love.graphics.getHeight()
-  Flux.to(things,introTime,{offset=maxOffset}):ease("quadin")
-  :after(titleTime,{titleAlpha = 255}):delay(0.5):oncomplete(function() ready = true end)
+  imgactual = math.random(6)
 end
 
-function Intro:update(dt) -- runs every frame
-  Flux.update(dt)
+function Kill:update(dt) -- runs every frame
+  --Flux.update(dt)
   localTime = localTime + dt
-
+  if localTime > 0.05 then
+    localTime = 0.0
+    imgactual = math.random(6)
+    end
 
 end
 
-local titleScale = 1.2
-function Intro:draw()
+
+function Kill:draw()
   love.graphics.setColor(255,255,255,255)
-  love.graphics.draw(background.img,0,-things.offset)
-  love.graphics.setColor(255,255,255,things.titleAlpha)
-  love.graphics.draw(titleImg, (love.graphics.getWidth()-titleImg:getWidth()*titleScale)/2, (love.graphics.getHeight()-titleImg:getHeight()*titleScale)/2,0,titleScale,titleScale)
-  love.graphics.setColor(0,0,0, things.blackAlpha)
-  love.graphics.rectangle("fill", 0,0, love.graphics.getWidth(),love.graphics.getHeight())
+  love.graphics.draw(background.img[imgactual],0,0)
+  --love.graphics.setColor(255,255,255,things.titleAlpha)
+ -- love.graphics.draw(titleImg, (love.graphics.getWidth()-titleImg:getWidth()*titleScale)/2, (love.graphics.getHeight()-titleImg:getHeight()*titleScale)/2,0,titleScale,titleScale)
+  --love.graphics.setColor(0,0,0, things.blackAlpha)
+  --love.graphics.rectangle("fill", 0,0, love.graphics.getWidth(),love.graphics.getHeight())
 end
 
-function Intro:keyreleased(key)
+function Kill:keyreleased(key)
   if ready then
     Flux.to(things, 1.5, {blackAlpha = 255}):delay(0.2):oncomplete(function()
         musicSource:stop()
@@ -70,4 +71,4 @@ function Intro:keyreleased(key)
   end
 end
 
-return Intro
+return Kill
