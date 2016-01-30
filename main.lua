@@ -48,7 +48,7 @@ function love.load()
     Gamestate.switch(Game)
 
     love.mouse.setVisible(true)
-    love.mouse.setGrabbed(true)
+    --love.mouse.setGrabbed(true)
 end
 
 function drawMouse() 
