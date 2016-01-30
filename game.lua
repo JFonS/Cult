@@ -229,7 +229,9 @@ function Game:update(dt) -- runs every frame
 end
 
 function lose() 
-  Gamestate.switch(Menu)
+ -- Gamestate.switch(Menu)
+  love.audio.stop(musicSource)
+  Gamestate.switch(Kill)
 end
 
 

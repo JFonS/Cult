@@ -4,8 +4,8 @@ require "lib/swingers"
 
 local Intro = {} 
 local musicSource, localTime, background, offset, titleImg
-local introTime = 1--8
-local titleTime = 1--5
+local introTime = 8
+local titleTime = 5
 local things = {}
 local ready = false
 
