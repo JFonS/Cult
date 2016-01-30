@@ -7,23 +7,28 @@ require "lib/postshader"
 require "lib/light"
 
 local Game = {} 
-local jefe, musicSource, bpm, beat, halfBeat, localTime, beatIndex, beatSteps, minions, background, fireImg
+local jefe, musicSource, bpm, beat, halfBeat, localTime, beatIndex, beatSteps, minions, background, fireImg, blueFireImg, mahand
+local fps = 0
 local handPositions = {}
 
 handPositions.l =  Vector(250,love.graphics.getHeight()-100)
 handPositions.r = Vector(love.graphics.getWidth() - 250,love.graphics.getHeight()-100)
-handPositions.u =    Vector(love.graphics.getWidth()/2,350)
-handPositions.d =  Vector(love.graphics.getWidth()/2,650)
-handPositions.idle = Vector(love.graphics.getWidth()/2 - 100,love.graphics.getHeight()/2 + 350)
+handPositions.u =    Vector(love.graphics.getWidth()/2,450)
+handPositions.d =  Vector(love.graphics.getWidth()/2,750)
+handPositions.idle = Vector(love.graphics.getWidth()/2 - 100,love.graphics.getHeight()/2 + 450)
 
 function Game:init()
   jefe = {}
   jefe.img = love.graphics.newImage("images/jefe.png")
   jefe.scale = Vector(0.7,0.7)
+  jefe.originalPos = Vector(love.graphics.getWidth()/2,love.graphics.getHeight()/2 + 150)
 
   jefe.hand = {}
   jefe.hand.img = love.graphics.newImage("images/liderhand.png")
   jefe.hand.scale = Vector(0.7,0.7)
+  jefe.hand.originalPos = handPositions.idle
+
+
 
   minions = {}
   minions.img = love.graphics.newImage("images/minions.png")
@@ -41,19 +46,37 @@ function Game:init()
   sequenceLen = 4
 
   fireImg = love.graphics.newImage("images/fire.png")
-  handPositions.lights = {}
-  local halfHandSize = Vector(jefe.hand.img:getWidth()/2,jefe.hand.img:getHeight()/2)
-  handPositions.lights[1] = {pos = (Vector(268,94) - halfHandSize) * jefe.hand.scale.x , trail = trailmesh:new(0,0,fireImg,20,0.5,.01)}
-  handPositions.lights[2] = {pos = (Vector(402,102) - halfHandSize) * jefe.hand.scale.x, trail = trailmesh:new(0,0,fireImg,20,0.5,.01)}
-  handPositions.lights[3] = {pos = (Vector(532,108) - halfHandSize) * jefe.hand.scale.x, trail = trailmesh:new(0,0,fireImg,20,0.5,.01)}
-  
+
+
   lightWorld = love.light.newWorld()
-	lightWorld.setAmbientColor(128, 128, 128)
-	lightWorld.setRefractionStrength(32.0)
-  
-  lightMouse = lightWorld.newLight(0, 0, 126, 175, 255, 800)
-	lightMouse.setGlowStrength(0.0)
+  lightWorld.setAmbientColor(128, 128, 128)
+
+  mahand = {}
+  mahand.img = love.graphics.newImage("images/mahand.png")
+  mahand.scale = 0.7
+  blueFireImg = love.graphics.newImage("images/blue-fire.png")
+  local halfHandSize = Vector(jefe.hand.img:getWidth()/2,jefe.hand.img:getHeight()/2)
+  mahand.pos = Vector(580, 450) * mahand.scale
+  mahand.light = lightWorld.newLight(0, 0, 126, 175, 255, 800)
+  mahand.trail = trailmesh:new(love.mouse.getX(),love.mouse.getY(),blueFireImg,10,0.2,.01)
+
+  mahand.light.setGlowSize(0.0)
+
+  handPositions.lights = {}
+
+  handPositions.lights[1] = new_light(Vector(268,194))
+  handPositions.lights[2] = new_light(Vector(402,202))-- - halfHandSize) * jefe.hand.scale.x, trail = trailmesh:new(0,0,fireImg,20,0.5,.01)}
+  handPositions.lights[3] = new_light(Vector(532,208))-- - halfHandSize) * jefe.hand.scale.x, trail = trailmesh:new(0,0,fireImg,20,0.5,.01)}
 end
+
+function new_light(p)
+  local halfHandSize = Vector(jefe.hand.img:getWidth()/2,jefe.hand.img:getHeight()/2)
+  local t = {pos = (p - halfHandSize) * jefe.hand.scale.x , trail = trailmesh:new(0,0,fireImg,20,0.5,.01)} 
+  print(t.pos.x,t.pos.y)
+  t.light = lightWorld.newLight(jefe.hand.originalPos.x+t.pos.x, jefe.hand.originalPos.y+t.pos.y, 105, 103, 03, 600)
+  return t
+end
+
 
 function Game:enter(previous)
   swingers.start()
@@ -62,12 +85,12 @@ function Game:enter(previous)
   beatIndex = -1
 
   beatSteps = {
-    {"l","r","u","d"},
+    {"l","r","u","c"},
     {"l","r","u","d"},
     {"r","l","r","u"}}
 
 
-  jefe.originalPos = Vector(love.graphics.getWidth()/2,love.graphics.getHeight()/2 + 150)
+
   jefe.pos = jefe.originalPos:clone()
 
   jefe.hand.originalPos = handPositions.idle
@@ -92,26 +115,55 @@ function hand_move(start, finish)
   :oncomplete(function() 
       jefe.hand.lightOn = true
       new_lights()
-      end)
-    :after(gameBeat/5*3,handPositions[finish])
-    :oncomplete(function() jefe.hand.lightOn = false end)
-    :after(gameBeat/5*2,handPositions.idle)
+    end)
+  :after(gameBeat/5*3,handPositions[finish])
+  :oncomplete(function() jefe.hand.lightOn = false end)
+  :after(gameBeat/5*2,handPositions.idle)
+end
+
+function hand_circle()
+    
+  local precision = 32
+  --local halfHandSize = Vector(jefe.hand.img:getWidth()/2,jefe.hand.img:getHeight()/2)
+  local c = Vector(love.graphics.getWidth()/2, love.graphics.getHeight()/2)
+  local r = (handPositions.idle - c):len()/2
+  local lastween = nil
+  for i=0,precision do
+    local a = ((2*math.pi)/precision)*i +math.pi/5
+    local nx = c.x + r * math.cos(a)
+    local ny = c.y+200 + r * math.sin(a)
+    if lastween == nil then 
+      lastween = Flux.to(jefe.hand.pos,gameBeat/precision-0.05,{x=nx,y=ny})
+      jefe.hand.lightOn = true
+    new_lights()
+    
+    else lastween = lastween:after(gameBeat/precision,{x=nx,y=ny}) end
+    print (a, nx,ny)
+  end
+  lastween:oncomplete(function()   jefe.hand.lightOn = false end)
 end
 
 function update_trails(dt) 
-  for _,light in pairs(handPositions.lights) do
+  for i,light in pairs(handPositions.lights) do
     light.trail.x, light.trail.y = jefe.hand.pos.x+light.pos.x+math.cos(localTime*32)*5*math.cos(localTime*2),  jefe.hand.pos.y+light.pos.y+math.sin(localTime*32)*5*math.sin(localTime*2)
     light.trail:update(dt)
+    light.light.setPosition(jefe.hand.pos.x+light.pos.x, jefe.hand.pos.x+light.pos.x)
+    light.light.setRange(math.sin(40*localTime%(math.cos(localTime*i)*24.645))*30+650)
   end
+  mahand.trail.x = love.mouse.getX()
+  mahand.trail.y = love.mouse.getY()
+  mahand.trail:update(dt)
 end
+
 
 
 function Game:update(dt) -- runs every frame
   swingers.update()
   Flux.update(dt)
   localTime = localTime + dt
-  
-  lightMouse.setPosition(love.mouse.getX(), love.mouse.getY())
+
+  mahand.light.setPosition(love.mouse.getX(), love.mouse.getY())
+  mahand.light.setRange(math.sin(40*localTime%(math.cos(localTime)*21.45))*20+200)
 
   local moveDist = 15
   local beatDist = math.abs(localTime % beat) 
@@ -143,6 +195,8 @@ function Game:update(dt) -- runs every frame
         hand_move("d","u")
       elseif move == "d" then
         hand_move("u","d")
+      elseif move == "c" then
+        hand_circle()
       end
     end
   else
@@ -169,38 +223,42 @@ end
 
 
 function Game:draw()
-  
-  lightWorld.update()
 
-	love.postshader.setBuffer("render")
-  
+  lightWorld.update()
+  love.postshader.setBuffer("render")
+
   love.graphics.setColor(255,255,255,255)
   love.graphics.draw(background.img,0,-2800 + love.graphics.getHeight())
-  
-  
-  
-  
+
   love.graphics.draw(minions.img, minions.pos.x, minions.pos.y, 0, minions.scale.x,minions.scale.y, minions.img:getWidth()/2, minions.img:getHeight()/2)
   love.graphics.draw(jefe.img, jefe.pos.x, jefe.pos.y, 0, jefe.scale.x,jefe.scale.y, jefe.img:getWidth()/2, jefe.img:getHeight()/2)
-  love.graphics.draw(jefe.hand.img, jefe.hand.pos.x, jefe.hand.pos.y, 0, jefe.hand.scale.x,jefe.hand.scale.y, jefe.hand.img:getWidth()/2, jefe.hand.img:getHeight()/2)
-  lightWorld.drawShadow()
-  lightWorld.drawShine()
-  lightWorld.drawPixelShadow()
-  lightWorld.drawGlow()
-  love.postshader.draw()
+  love.graphics.draw(jefe.hand.img, jefe.hand.pos.x, jefe.hand.pos.y, 0, jefe.hand.scale.x,jefe.hand.scale.y, jefe.hand.img:getWidth()/2, jefe.hand.img:getHeight()/2-100)
 
-  if (jefe.hand.lightOn) then
-    love.graphics.setBlendMode("alpha")
-    --trail:draw()
 
+  local fireBlendMode = "additive"
+  if ( jefe.hand.lightOn) then
+    love.graphics.setBlendMode(fireBlendMode)
     handPositions.lights[1].trail:draw()
     handPositions.lights[2].trail:draw()
     handPositions.lights[3].trail:draw()
   end
-  
-  love.graphics.print("beatIndex: " .. math.floor(beatIndex),10,10)
 
-  --drawMouse()
+
+
+
+  love.graphics.setBlendMode(fireBlendMode)
+  mahand.trail:draw()
+  love.graphics.setBlendMode("alpha")
+
+  lightWorld.drawShadow()
+  lightWorld.drawShine()
+  lightWorld.drawPixelShadow()
+  lightWorld.drawGlow()
+
+  love.graphics.setBlendMode("alpha")
+  love.graphics.draw(mahand.img, love.mouse.getX() - mahand.pos.x, love.mouse.getY() - mahand.pos.y, 0, mahand.scale,mahand.scale)
+
+  love.postshader.draw()
 end
 
 function Game:keyreleased(key)
@@ -211,8 +269,16 @@ function Game:keyreleased(key)
   end
 end
 
+function Game:mousepressed(x,y, mouse_btn)
+  if mouse_btn == "l" then
+    mahand.trail = trailmesh:new(love.mouse.getX(),love.mouse.getY(),blueFireImg,20,0.6,.01)
+  end
+end
+
 function Game:mousereleased(x,y, mouse_btn)
-  print("mousereleased")
+  if mouse_btn == "l" then
+    mahand.trail = trailmesh:new(love.mouse.getX(),love.mouse.getY(),blueFireImg,10,0.2,.01)
+  end
 end
 
 return Game
