@@ -34,7 +34,7 @@ module("swingers")
 --Start it all up, well, just empty the queue :P
 function start(btn)
 	queue = {}
-	_M.btn = btn or 1
+	_M.btn = btn or "l"
 	return true
 end
 

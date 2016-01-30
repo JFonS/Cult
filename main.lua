@@ -6,6 +6,7 @@ Gamestate = require "lib/gamestate"
 
 Game = require "game"
 Menu = require "menu"
+Intro = require "intro"
 
 local fish = {}
 
@@ -45,7 +46,7 @@ function love.load()
     -- mouseParticles:setSpeed(5,7)
     -- mouseParticles:setSpread(0.1)
     Gamestate.registerEvents()
-    Gamestate.switch(Game)
+    Gamestate.switch(Intro)
 
     love.mouse.setVisible(true)
     --love.mouse.setGrabbed(true)

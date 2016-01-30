@@ -1,6 +1,6 @@
 function love.conf(t)
     t.identity = nil                    -- The name of the save directory (string)
-    t.version = "0.10.0"                -- The LÖVE version this game was made for (string)
+    t.version = "0.9.2"                -- The LÖVE version this game was made for (string)
     t.console = false                   -- Attach a console (boolean, Windows only)
     t.gammacorrect = true              -- Enable gamma-correct rendering, when supported by the system (boolean)
  
