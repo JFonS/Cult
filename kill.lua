@@ -1,17 +1,27 @@
-local Flux = require "lib/flux"
-local Vector = require "lib/vector"
-require "lib/swingers"
+--local Flux = require "lib/flux"
+--local Vector = require "lib/vector"
+--require "lib/swingers"
 
-local Intro = {} 
-local musicSource, localTime, background, offset, titleImg
-local introTime = 8
-local titleTime = 5
-local things = {}
-local ready = false
+local Kill = {} 
+--local musicSource, localTime, background, offset, titleImg
+--local introTime = 8
+--local titleTime = 5
+--local things = {}
+--local ready = false
 
 function Intro:init()
   background = {}
-  background.img = love.graphics.newImage("images/cathedral.png")
+  background.img = {}
+  
+  background.img[1] = love.graphics.newImage("images/Glitch/1.png")
+  background.img[2] = love.graphics.newImage("images/Glitch/2.png")
+  background.img[3] = love.graphics.newImage("images/Glitch/3.png")
+  background.img[4] = love.graphics.newImage("images/Glitch/4.png")
+  background.img[5] = love.graphics.newImage("images/Glitch/5.png")
+  background.img[6] = love.graphics.newImage("images/Glitch/6.png")
+  
+  background.title = love.graphics.newImage("images/Glitch/title.png")
+
 
   titleImg = love.graphics.newImage("images/title.png")
 
