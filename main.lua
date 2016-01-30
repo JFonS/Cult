@@ -3,8 +3,9 @@ Beholder = require "lib/beholder"
 Camera = require "lib/camera"
 Gamestate = require "lib/gamestate"
 
-Menu = require "menu"
+
 Game = require "game"
+Menu = require "menu"
 
 
 

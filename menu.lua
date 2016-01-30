@@ -13,12 +13,14 @@ function Menu:update(dt) -- runs every frame
 end
 
 function Menu:draw()
-    
+    love.graphics.setColor(255,0,0)
+    love.graphics.rectangle("fill", 0,0,100,100)
+    love.graphics.setColor(255,255,255)
 end
 
 function Menu:keyreleased(key)
     if key == 'up' then
-        print("released up")
+        Gamestate.switch(Game)
     elseif key == 'down' then
         print("released down")
     end
