@@ -14,5 +14,6 @@ function love.conf(t)
     t.window.vsync = true               -- Enable vertical sync (boolean)
     t.window.msaa = 0                   -- The number of samples to use with multi-sampled antialiasing (number)
     t.window.display = 1                -- Index of the monitor to show the window in (number)
-    t.window.highdpi = false            -- Enable high-dpi mode for the window on a Retina display (boolean)
+    t.window.highdpi = true            -- Enable high-dpi mode for the window on a Retina display (boolean)
+    t.window.fullscreen = false
 end

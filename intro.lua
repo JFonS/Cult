@@ -56,7 +56,14 @@ function Intro:draw()
 end
 
 function Intro:keyreleased(key)
-  math.randomseed(os.time())
+  goto_game()
+end
+
+function Intro:mousereleased(key)
+  goto_game()
+end
+
+function goto_game()
   if ready then
     Flux.to(things, 1.5, {blackAlpha = 255}):delay(0.2):oncomplete(function()
         musicSource:stop()
