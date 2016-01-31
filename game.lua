@@ -14,6 +14,8 @@ local fps = 0
 local handPositions = {}
 local deathTime 
 local death
+local countdown
+local countNumbers = {}
 
 handPositions.l =  Vector(250,love.graphics.getHeight()-100)
 handPositions.r = Vector(love.graphics.getWidth() - 250,love.graphics.getHeight()-100)
@@ -43,7 +45,7 @@ function Game:init()
 
   musicSource:setLooping(true)
   failMusicSource:setLooping(false)
-  
+
   bpm = (16) * 60 / (8)
   beat = 60 / bpm 
   gameBeat = beat*2
@@ -51,7 +53,7 @@ function Game:init()
   sequenceLen = 4
 
   fireImg = love.graphics.newImage("images/fire.png")
-
+  blueFireImg = love.graphics.newImage("images/blue-fire.png")
 
   lightWorld = love.light.newWorld()
   lightWorld.setAmbientColor(128, 128, 128)
@@ -59,11 +61,9 @@ function Game:init()
   mahand = {}
   mahand.img = love.graphics.newImage("images/mahand.png")
   mahand.scale = 0.7
-  blueFireImg = love.graphics.newImage("images/blue-fire.png")
-  local halfHandSize = Vector(jefe.hand.img:getWidth()/2,jefe.hand.img:getHeight()/2)
+
   mahand.pos = Vector(580, 450) * mahand.scale
   mahand.light = lightWorld.newLight(0, 0, 126, 175, 255, 800)
-  
 
   mahand.light.setGlowSize(0.0)
 
@@ -72,8 +72,10 @@ function Game:init()
   handPositions.lights[1] = new_light(Vector(268,194))
   handPositions.lights[2] = new_light(Vector(402,202))
   handPositions.lights[3] = new_light(Vector(532,208))
-  deathTime = 0.0
-  death = false
+
+  countNumbers[1] = love.graphics.newImage("images/1.png")
+  countNumbers[2] = love.graphics.newImage("images/2.png")
+  countNumbers[3] = love.graphics.newImage("images/3.png")
 end
 
 function new_light(p)
@@ -87,12 +89,10 @@ end
 
 function Game:enter(previous)
   math.randomseed(os.time())
+
   swingers.start()
   love.audio.rewind(musicSource)
   love.audio.play(musicSource)
-  beatIndex = -1
-
-  currentSteps = {}
 
   jefe.pos = jefe.originalPos:clone()
 
@@ -104,13 +104,24 @@ function Game:enter(previous)
   minions.pos = minions.originalPos:clone()
   minions.scale = Vector(1,1)
   localTime = 0.0
-  
+
   mahand.trail = trailmesh:new(love.mouse.getX(),love.mouse.getY(),blueFireImg,10,0.2,.01)
-  
+
   completedLastMove = true
   deathTime = 0.0
   death = false
+  countdown = true
 end
+
+function start_game()
+  localTime = 0.0
+  love.audio.rewind(musicSource)
+  love.audio.play(musicSource)
+  beatIndex = -1
+  currentSteps = {}
+  countdown = false
+end
+
 
 function new_lights()
   for _,light in pairs(handPositions.lights) do
@@ -165,18 +176,21 @@ function update_trails(dt)
   mahand.trail.x = love.mouse.getX()
   mahand.trail.y = love.mouse.getY()
   mahand.trail:update(dt)
+  mahand.light.setPosition(love.mouse.getX(), love.mouse.getY())
+  mahand.light.setRange(math.sin(40*localTime%(math.cos(localTime)*21.45))*20+200)
 end
 
 
 
 function Game:update(dt) -- runs every frame
+  update_trails(dt)
+  localTime = localTime + dt
+
   if not death then
+
     swingers.update()
     Flux.update(dt)
-    localTime = localTime + dt
 
-    mahand.light.setPosition(love.mouse.getX(), love.mouse.getY())
-    mahand.light.setRange(math.sin(40*localTime%(math.cos(localTime)*21.45))*20+200)
 
     local moveDist = 15
     local beatDist = math.abs(localTime % beat) 
@@ -188,63 +202,65 @@ function Game:update(dt) -- runs every frame
       minions.pos.y = minions.originalPos.y - (beatDist / ((beat/5)*4)) * moveDist *0.4
     end
 
-    update_trails(dt)
-
-    local newIndex = math.floor(localTime * bpm * (1/60) * (0.5))
-
-    local indexChanged = newIndex ~= beatIndex
-    beatIndex = newIndex
-
-    if (indexChanged and not completedLastMove) then lose() end
-    --local part = beatSteps[math.floor((beatIndex/2)/sequenceLen) + 1]
-    --local move = part[beatIndex%4 + 1]
-    if (beatIndex % (sequenceLen*2) < sequenceLen)  then
-      if indexChanged then
-        local move = moves[math.random(1,5)]
-        local move = moves[math.random(1,5)]
-        print(move)
-        if beatIndex%4 == 0 then currentSteps = {} end
-        currentSteps[#currentSteps+1] = move
-        if move == "l" then
-          hand_move("r","l")
-        elseif move == "r" then
-          hand_move("l","r")
-        elseif move == "u" then
-          hand_move("d","u")
-        elseif move == "d" then
-          hand_move("u","d")
-        elseif move == "c" then
-          hand_circle()
-        end
+    if countdown then
+      local waitLen = gameBeat*sequenceLen*2
+      if localTime >= waitLen then
+        start_game()
       end
     else
-      local move = currentSteps[beatIndex%4 + 1]
-      if indexChanged then 
-        swingers.start()
-        completedLastMove = false
-      end
+      local newIndex = math.floor(localTime * bpm * (1/60) * (0.5))
 
-      if swingers.checkGesture() then
-        if move == "c" then
-          if EditDistance({"w","nw","n","ne","e","se","s","sw","s"}, swingers.getExtGesture(),2) >= 2 then
-            lose()
-          else
-            completedLastMove = true
-          end
-        else
-          if move ~= swingers.getGesture() then
-            lose()
-          else
-            completedLastMove = true
+      local indexChanged = newIndex ~= beatIndex
+      beatIndex = newIndex
+
+      if (indexChanged and not completedLastMove) then lose() end
+      if (beatIndex % (sequenceLen*2) < sequenceLen)  then
+        if indexChanged then
+          local move = moves[math.random(1,5)]
+          local move = moves[math.random(1,5)]
+          print(move)
+          if beatIndex%4 == 0 then currentSteps = {} end
+          currentSteps[#currentSteps+1] = move
+          if move == "l" then
+            hand_move("r","l")
+          elseif move == "r" then
+            hand_move("l","r")
+          elseif move == "u" then
+            hand_move("d","u")
+          elseif move == "d" then
+            hand_move("u","d")
+          elseif move == "c" then
+            hand_circle()
           end
         end
-      end  
-    end
+      else
+        local move = currentSteps[beatIndex%4 + 1]
+        if indexChanged then 
+          swingers.start()
+          completedLastMove = false
+        end
 
+        if swingers.checkGesture() then
+          if move == "c" then
+            if EditDistance({"w","nw","n","ne","e","se","s","sw","s"}, swingers.getExtGesture(),3) >= 3 then
+              lose()
+            else
+              completedLastMove = true
+            end
+          else
+            if move ~= swingers.getGesture() then
+              lose()
+            else
+              completedLastMove = true
+            end
+          end
+        end  
+      end
+    end
   else
     deathTime = deathTime + dt
     if deathTime >= 2 then
-      
+
       Gamestate.switch(Kill)
     end
   end
@@ -293,6 +309,15 @@ function Game:draw()
   love.graphics.setBlendMode("alpha")
   love.graphics.draw(mahand.img, love.mouse.getX() - mahand.pos.x, love.mouse.getY() - mahand.pos.y, 0, mahand.scale,mahand.scale)
 
+  if countdown then
+    local waitLen = gameBeat*sequenceLen*2
+    for i=3,1,-1 do
+      if localTime >= waitLen - gameBeat*i and localTime < waitLen - gameBeat*(i-1) then
+        local img = countNumbers[i]
+        love.graphics.draw(img,love.graphics.getWidth()/2,love.graphics.getHeight()/2,0,1,1,img:getWidth()/2,img:getHeight()/2)
+      end
+    end
+  end
   love.postshader.draw()
 end
 
