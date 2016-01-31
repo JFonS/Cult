@@ -6,6 +6,7 @@ local Kill = {}
 --local musicSource, localTime, background, offset, titleImg
 local localTime
 local imgactual
+local musicSource
 
 --local introTime = 8
 --local titleTime = 5
@@ -28,6 +29,9 @@ function Kill:init()
 
   titleImg = love.graphics.newImage("images/title.png")
   
+  musicSource = love.audio.newSource( "music/randomnoise.wav", "static")
+  musicSource:setLooping(true)
+  
 
  -- musicSource = love.audio.newSource( "music/level1.wav", "static")
 
@@ -40,6 +44,7 @@ function Kill:enter(previous)
 
   localTime = 0.0
   imgactual = math.random(6)
+  love.audio.play(musicSource)
 end
 
 function Kill:update(dt) -- runs every frame
