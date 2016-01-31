@@ -16,6 +16,12 @@ local deathTime
 local death
 local countdown
 local countNumbers = {}
+local circles = {
+  {"w","nw","n","ne","e","se","s","sw"},
+  {"n","ne","e","se","s","sw","w","nw"},
+  {"e","se","s","sw","w","nw","n","ne"},
+  {"s","sw","w","nw","n","ne","e","se"}
+}
 
 handPositions.l =  Vector(250,love.graphics.getHeight()-100)
 handPositions.r = Vector(love.graphics.getWidth() - 250,love.graphics.getHeight()-100)
@@ -242,10 +248,15 @@ function Game:update(dt) -- runs every frame
 
         if swingers.checkGesture() then
           if move == "c" then
-            if EditDistance({"w","nw","n","ne","e","se","s","sw","s"}, swingers.getExtGesture(),3) >= 3 then
-              lose()
-            else
+            local gesture = swingers.getExtGesture()
+            local found = false
+            for _,circle in pairs(circles) do
+              if EditDistance(circle, gesture,3) < 3 then found = true end
+            end
+            if found then
               completedLastMove = true
+            else
+              lose()
             end
           else
             if move ~= swingers.getGesture() then
