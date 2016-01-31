@@ -78,10 +78,10 @@ function Kill:keyreleased(key)
 end
 
 function Kill:mousereleased(key)
-  goto_game()
+  game()
 end
 
-function goto_game()
+function game()
   Flux.to(things, 1.5, {blackAlpha = 255}):delay(0.2):oncomplete(function()
       musicSource:stop()
       Gamestate.switch(Game)

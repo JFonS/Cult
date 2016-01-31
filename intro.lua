@@ -7,7 +7,7 @@ local musicSource, localTime, background, offset, titleImg
 local introTime = 8
 local titleTime = 5
 local things = {}
-local ready = false
+local myBodyIsReady = false
 
 function Intro:init()
   Score = 0 
@@ -35,14 +35,13 @@ function Intro:enter(previous)
 
   maxOffset = 2800-love.graphics.getHeight()
   Flux.to(things,introTime,{offset=maxOffset}):ease("quadin")
-  :after(titleTime,{titleAlpha = 255}):delay(0.5):oncomplete(function() ready = true end)
+  :after(titleTime,{titleAlpha = 255}):delay(0.5):oncomplete(function() myBodyIsReady = true end)
+  myBodyIsReady = false
 end
 
 function Intro:update(dt) -- runs every frame
   Flux.update(dt)
   localTime = localTime + dt
-
-
 end
 
 local titleScale = 1.2
@@ -56,19 +55,19 @@ function Intro:draw()
 end
 
 function Intro:keyreleased(key)
-  goto_game()
+  gamemilans()
 end
 
 function Intro:mousereleased(key)
-  goto_game()
+  gamemilans()
 end
 
-function goto_game()
-  if ready then
+function gamemilans()
+  if myBodyIsReady then
     Flux.to(things, 1.5, {blackAlpha = 255}):delay(0.2):oncomplete(function()
         musicSource:stop()
         Gamestate.switch(Game)
-      end)
+     end)
   end
 end
 
