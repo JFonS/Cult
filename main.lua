@@ -14,7 +14,7 @@ local fish = {}
 function love.load()
     Gamestate.registerEvents()
     Gamestate.switch(Intro)
-   -- Gamestate.switch(Game)
+    --Gamestate.switch(Game)
 
     love.mouse.setVisible(false)
     love.mouse.setGrabbed(true)
