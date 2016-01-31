@@ -7,16 +7,14 @@ require "lib/postshader"
 require "lib/light"
 require "lib/edit-distance"
 
-local Game = {} 
-local jefe, musicSource, musicSource1, musicSource2, failMusicSource, bpm, beat, halfBeat, localTime, beatIndex, currentSteps, minions, background, fireImg, blueFireImg, mahand
+local Game2 = {} 
+local jefe, musicSource, failMusicSource, bpm, beat, halfBeat, localTime, beatIndex, currentSteps, minions, background, fireImg, blueFireImg, mahand
 local moves = {"l","r","u","d","c"}
+local fps = 0
 local handPositions = {}
 local deathTime 
 local death
-local countdown
 local countNumbers = {}
-local maxScore = 12
-local changedMusic 
 
 local circles = {
   {"w","nw","n","ne","e","se","s","sw"},
@@ -31,22 +29,7 @@ handPositions.u =    Vector(love.graphics.getWidth()/2,300)
 handPositions.d =  Vector(love.graphics.getWidth()/2,750)
 handPositions.idle = Vector(love.graphics.getWidth()/2,love.graphics.getHeight()/2 + 350)
 
-function change_music()
-  print("CHANGED")
-  love.audio.stop(musicSource)
-  musicSource = musicSource2
-  love.audio.play(musicSource)
-  bpm = (16) * 60 / (7.338667)
-  beat = 60 / bpm 
-  gameBeat = beat*2
-  halfBeat = beat/2
-  sequenceLen = 4
-  localTime = 0.0
-  changedMusic = true
-
-end
-
-function Game:init()
+function Game2:init()
   jefe = {}
   jefe.img = love.graphics.newImage("images/jefe.png")
   jefe.scale = Vector(0.7,0.7)
@@ -63,13 +46,17 @@ function Game:init()
   background = {}
   background.img = love.graphics.newImage("images/background.png")
 
-  musicSource1 = love.audio.newSource("music/level1.wav", "static")
-  musicSource2 = love.audio.newSource("music/Level2.wav", "static")
-  failMusicSource = love.audio.newSource("music/hpitch.mp3")
+  musicSource = love.audio.newSource( "music/level1.wav", "static")
+  failMusicSource = love.audio.newSource( "music/hpitch.mp3")
 
-  musicSource1:setLooping(true)
-  musicSource2:setLooping(true)
+  musicSource:setLooping(true)
   failMusicSource:setLooping(false)
+
+  bpm = (16) * 60 / (8)
+  beat = 60 / bpm 
+  gameBeat = beat*2
+  halfBeat = beat/2
+  sequenceLen = 4
 
   fireImg = love.graphics.newImage("images/fire.png")
   blueFireImg = love.graphics.newImage("images/blue-fire.png")
@@ -106,10 +93,8 @@ function new_light(p)
 end
 
 
-function Game:enter(previous)
+function Game2:enter(previous)
   math.randomseed(os.time())
-
-  musicSource = musicSource1
 
   swingers.start()
   love.audio.rewind(musicSource)
@@ -127,19 +112,11 @@ function Game:enter(previous)
   localTime = 0.0
 
   mahand.trail = trailmesh:new(love.mouse.getX(),love.mouse.getY(),blueFireImg,10,0.2,.01)
-  
-  bpm = (16) * 60 / (8.021333)
-  beat = 60 / bpm 
-  gameBeat = beat*2
-  halfBeat = beat/2
-  sequenceLen = 4
 
   completedLastMove = true
   deathTime = 0.0
   death = false
-  countdown = true
-  Score = 0
-  changedMusic = false
+  start_game()
 end
 
 function start_game()
@@ -148,7 +125,6 @@ function start_game()
   love.audio.play(musicSource)
   beatIndex = -1
   currentSteps = {}
-  countdown = false
 end
 
 
@@ -211,13 +187,12 @@ end
 
 
 
-function Game:update(dt) -- runs every frame
+function Game2:update(dt) -- runs every frame
   update_trails(dt)
   localTime = localTime + dt
 
   if not death then
-    if Score >= maxScore and not changedMusic then change_music() end
-    print(localTime)
+
     swingers.update()
     Flux.update(dt)
 
@@ -308,8 +283,8 @@ function lose()
 end
 
 
-function Game:draw()
-
+function Game2:draw()
+  
   lightWorld.update()
   love.postshader.setBuffer("render")
 
@@ -340,10 +315,10 @@ function Game:draw()
 
   love.graphics.setBlendMode("alpha")
   love.graphics.draw(mahand.img, love.mouse.getX() - mahand.pos.x, love.mouse.getY() - mahand.pos.y, 0, mahand.scale,mahand.scale)
-
+  
   love.graphics.setNewFont("fonts/Gypsy_Curse.ttf", 80)
   love.graphics.print(Score, 20,15)
-
+  
   if countdown then
     local waitLen = gameBeat*sequenceLen*2
     for i=4,1,-1 do
@@ -356,16 +331,16 @@ function Game:draw()
   love.postshader.draw()
 end
 
-function Game:mousepressed(x,y, mouse_btn)
+function Game2:mousepressed(x,y, mouse_btn)
   if mouse_btn == "l" then
     mahand.trail = trailmesh:new(love.mouse.getX(),love.mouse.getY(),blueFireImg,20,0.6,.01)
   end
 end
 
-function Game:mousereleased(x,y, mouse_btn)
+function Game2:mousereleased(x,y, mouse_btn)
   if mouse_btn == "l" then
     mahand.trail = trailmesh:new(love.mouse.getX(),love.mouse.getY(),blueFireImg,10,0.2,.01)
   end
 end
 
-return Game
+return Game2
