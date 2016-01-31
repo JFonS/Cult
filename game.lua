@@ -32,7 +32,6 @@ handPositions.d =  Vector(love.graphics.getWidth()/2,750)
 handPositions.idle = Vector(love.graphics.getWidth()/2,love.graphics.getHeight()/2 + 350)
 
 function change_music()
-  print("CHANGED")
   love.audio.stop(musicSource)
   musicSource = musicSource2
   love.audio.play(musicSource)
@@ -217,7 +216,6 @@ function Game:update(dt) -- runs every frame
 
   if not death then
     if Score >= maxScore and not changedMusic then change_music() end
-    print(localTime)
     swingers.update()
     Flux.update(dt)
 

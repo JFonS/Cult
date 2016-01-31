@@ -21,3 +21,9 @@ function love.load()
     love.mouse.setGrabbed(true)
 end
 
+function love.keypressed(key)
+  if key == "escape" then
+    love.event.push('quit') 
+  end
+end
+

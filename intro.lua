@@ -23,6 +23,7 @@ function Intro:init()
 end
 
 function Intro:enter(previous)
+   myBodyIsReady = false
   Score = 0
   
   love.audio.rewind(musicSource)
@@ -34,9 +35,8 @@ function Intro:enter(previous)
   things.blackAlpha = 0
 
   maxOffset = 2800-love.graphics.getHeight()
-  Flux.to(things,introTime,{offset=maxOffset}):ease("quadin")
-  :after(titleTime,{titleAlpha = 255}):delay(0.5):oncomplete(function() myBodyIsReady = true end)
-  myBodyIsReady = false
+  Flux.to(things,introTime,{offset=maxOffset}):ease("quadin"):oncomplete(function() myBodyIsReady = true end)
+  :after(titleTime,{titleAlpha = 255}):delay(0.5)
 end
 
 function Intro:update(dt) -- runs every frame
