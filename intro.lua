@@ -52,6 +52,7 @@ function Intro:draw()
 end
 
 function Intro:keyreleased(key)
+  math.randomseed(os.time())
   if ready then
     Flux.to(things, 1.5, {blackAlpha = 255}):delay(0.2):oncomplete(function()
         musicSource:stop()

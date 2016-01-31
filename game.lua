@@ -8,7 +8,8 @@ require "lib/light"
 require "lib/edit-distance"
 
 local Game = {} 
-local jefe, musicSource, failMusicSource, bpm, beat, halfBeat, localTime, beatIndex, beatSteps, minions, background, fireImg, blueFireImg, mahand
+local jefe, musicSource, failMusicSource, bpm, beat, halfBeat, localTime, beatIndex, currentSteps, minions, background, fireImg, blueFireImg, mahand
+local moves = {"l","r","u","d","c","none"}
 local fps = 0
 local handPositions = {}
 local deathTime 
@@ -85,17 +86,13 @@ end
 
 
 function Game:enter(previous)
+  math.randomseed(os.time())
   swingers.start()
   love.audio.rewind(musicSource)
   love.audio.play(musicSource)
   beatIndex = -1
 
-  beatSteps = {
-    {"l","r","c","u"},
-    {"l","r","u","d"},
-    {"r","l","r","u"}}
-
-
+  currentSteps = {}
 
   jefe.pos = jefe.originalPos:clone()
 
@@ -133,7 +130,7 @@ function hand_circle()
   local c = Vector(love.graphics.getWidth()/2, love.graphics.getHeight()/2)
   local r = (handPositions.idle - c):len()/2
 
-  local arcTime = (gameBeat - gameBeat/3)/(precision+0.05)
+  local arcTime = (gameBeat - gameBeat/3)/(precision+0.2)
 
   local offset = math.pi/2
   local nx = c.x + r * math.cos(offset)
@@ -194,10 +191,14 @@ function Game:update(dt) -- runs every frame
     beatIndex = newIndex
 
     if (indexChanged and not completedLastMove) then lose() end
-    local part = beatSteps[math.floor((beatIndex/2)/sequenceLen) + 1]
-    local move = part[beatIndex%4 + 1]
+    --local part = beatSteps[math.floor((beatIndex/2)/sequenceLen) + 1]
+    --local move = part[beatIndex%4 + 1]
     if (beatIndex % (sequenceLen*2) < sequenceLen)  then
       if indexChanged then
+        local move = moves[math.random(1,6)]
+        print(move)
+        if beatIndex%4 == 0 then currentSteps = {} end
+        currentSteps[#currentSteps+1] = move
         if move == "l" then
           hand_move("r","l")
         elseif move == "r" then
@@ -211,6 +212,7 @@ function Game:update(dt) -- runs every frame
         end
       end
     else
+      local move = currentSteps[beatIndex%4 + 1]
       if indexChanged then 
         swingers.start()
         completedLastMove = move == "none"
@@ -218,7 +220,7 @@ function Game:update(dt) -- runs every frame
 
       if swingers.checkGesture() then
         if move == "c" then
-          if EditDistance({"w","nw","n","ne","e","se","s","sw","s"}, swingers.getExtGesture(),4) >= 4 then
+          if EditDistance({"w","nw","n","ne","e","se","s","sw","s"}, swingers.getExtGesture(),2) >= 2 then
             lose()
           else
             completedLastMove = true
