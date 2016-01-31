@@ -1,4 +1,4 @@
---local Flux = require "lib/flux"
+local Flux = require "lib/flux"
 --local Vector = require "lib/vector"
 --require "lib/swingers"
 
@@ -7,6 +7,7 @@ local Kill = {}
 local localTime
 local imgactual
 local musicSource
+local things = {}
 
 --local introTime = 8
 --local titleTime = 5
@@ -44,12 +45,14 @@ function Kill:enter(previous)
 
   localTime = 0.0
   imgactual = math.random(6)
+  things.blackAlpha = 0
   love.audio.play(musicSource)
 end
 
 function Kill:update(dt) -- runs every frame
   --Flux.update(dt)
   localTime = localTime + dt
+  Flux.update(dt)
   if localTime > 0.05 then
     localTime = 0.0
     imgactual = math.random(6)
@@ -64,17 +67,15 @@ function Kill:draw()
   love.graphics.draw(background.title,240,20)
   --love.graphics.setColor(255,255,255,things.titleAlpha)
  -- love.graphics.draw(titleImg, (love.graphics.getWidth()-titleImg:getWidth()*titleScale)/2, (love.graphics.getHeight()-titleImg:getHeight()*titleScale)/2,0,titleScale,titleScale)
-  --love.graphics.setColor(0,0,0, things.blackAlpha)
-  --love.graphics.rectangle("fill", 0,0, love.graphics.getWidth(),love.graphics.getHeight())
+  love.graphics.setColor(0,0,0, things.blackAlpha)
+  love.graphics.rectangle("fill", 0,0, love.graphics.getWidth(),love.graphics.getHeight())
 end
 
 function Kill:keyreleased(key)
-  if ready then
-    Flux.to(things, 1.5, {blackAlpha = 255}):delay(0.2):oncomplete(function()
+   Flux.to(things, 1.5, {blackAlpha = 255}):delay(0.2):oncomplete(function()
         musicSource:stop()
         Gamestate.switch(Game)
       end)
-  end
 end
 
 return Kill

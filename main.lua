@@ -9,6 +9,8 @@ Menu = require "menu"
 Intro = require "intro"
 Kill = require "kill"
 
+Score = 0
+
 local fish = {}
 
 function love.load()
