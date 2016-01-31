@@ -29,7 +29,7 @@ function Kill:init()
 
   titleImg = love.graphics.newImage("images/title.png")
   
-  musicSource = love.audio.newSource( "music/randomnoise.wav", "static")
+  musicSource = love.audio.newSource( "music/randomnoise.wav")
   musicSource:setLooping(true)
   
 
@@ -61,6 +61,7 @@ end
 function Kill:draw()
   love.graphics.setColor(255,255,255,255)
   love.graphics.draw(background.img[imgactual],0,0)
+  love.graphics.draw(background.title,240,20)
   --love.graphics.setColor(255,255,255,things.titleAlpha)
  -- love.graphics.draw(titleImg, (love.graphics.getWidth()-titleImg:getWidth()*titleScale)/2, (love.graphics.getHeight()-titleImg:getHeight()*titleScale)/2,0,titleScale,titleScale)
   --love.graphics.setColor(0,0,0, things.blackAlpha)
