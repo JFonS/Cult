@@ -66,7 +66,9 @@ function Kill:draw()
   love.graphics.draw(background.img[imgactual],0,0)
   love.graphics.draw(background.title,240,20)
   love.graphics.setNewFont("fonts/Zombie_Holocaust.ttf",80)
-  love.graphics.print("Score: "..Score,450, 650, 0, 1, 1, 1)
+  love.graphics.print("Score ",50, 600, 0, 1, 1, 1)
+  love.graphics.setNewFont("fonts/Gypsy_Curse.ttf", 80)
+  love.graphics.print(": "..Score, 230, 600, 0, 1, 1, 1)
   --love.graphics.setColor(255,255,255,things.titleAlpha)
   -- love.graphics.draw(titleImg, (love.graphics.getWidth()-titleImg:getWidth()*titleScale)/2, (love.graphics.getHeight()-titleImg:getHeight()*titleScale)/2,0,titleScale,titleScale)
   love.graphics.setColor(0,0,0, things.blackAlpha)
@@ -74,7 +76,7 @@ function Kill:draw()
 end
 
 function Kill:keyreleased(key)
-  goto_game()
+  game()
 end
 
 function Kill:mousereleased(key)

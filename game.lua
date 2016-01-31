@@ -252,6 +252,7 @@ function Game:update(dt) -- runs every frame
               lose()
             else
               completedLastMove = true
+              Score = Score + 1
             end
           end
         end  
