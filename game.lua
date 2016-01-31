@@ -9,7 +9,7 @@ require "lib/edit-distance"
 
 local Game = {} 
 local jefe, musicSource, failMusicSource, bpm, beat, halfBeat, localTime, beatIndex, currentSteps, minions, background, fireImg, blueFireImg, mahand
-local moves = {"l","r","u","d","c","none"}
+local moves = {"l","r","u","d","c"}
 local fps = 0
 local handPositions = {}
 local deathTime 
@@ -197,7 +197,7 @@ function Game:update(dt) -- runs every frame
     --local move = part[beatIndex%4 + 1]
     if (beatIndex % (sequenceLen*2) < sequenceLen)  then
       if indexChanged then
-        local move = moves[math.random(1,6)]
+        local move = moves[math.random(1,5)]
         print(move)
         if beatIndex%4 == 0 then currentSteps = {} end
         currentSteps[#currentSteps+1] = move
@@ -217,7 +217,7 @@ function Game:update(dt) -- runs every frame
       local move = currentSteps[beatIndex%4 + 1]
       if indexChanged then 
         swingers.start()
-        completedLastMove = move == "none"
+        completedLastMove = false
       end
 
       if swingers.checkGesture() then
@@ -230,7 +230,6 @@ function Game:update(dt) -- runs every frame
         else
           if move ~= swingers.getGesture() then
             lose()
-
           else
             completedLastMove = true
           end
