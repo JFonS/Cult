@@ -15,7 +15,7 @@ function Intro:init()
 
   titleImg = love.graphics.newImage("images/title.png")
 
-  musicSource = love.audio.newSource( "music/level1.wav", "static")
+  musicSource = love.audio.newSource( "music/Intro.wav", "static")
 
   musicSource:setLooping(true)
 end
