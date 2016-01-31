@@ -8,7 +8,7 @@ require "lib/light"
 require "lib/edit-distance"
 
 local Game = {} 
-local jefe, musicSource, bpm, beat, halfBeat, localTime, beatIndex, beatSteps, minions, background, fireImg, blueFireImg, mahand
+local jefe, musicSource, failMusicSource, bpm, beat, halfBeat, localTime, beatIndex, beatSteps, minions, background, fireImg, blueFireImg, mahand
 local fps = 0
 local handPositions = {}
 local deathTime 
@@ -38,8 +38,11 @@ function Game:init()
   background.img = love.graphics.newImage("images/background.png")
 
   musicSource = love.audio.newSource( "music/level1.wav", "static")
+  failMusicSource = love.audio.newSource( "music/hpitch.mp3")
 
   musicSource:setLooping(true)
+  failMusicSource:setLooping(false)
+  
   bpm = (16) * 60 / (8)
   beat = 60 / bpm 
   gameBeat = beat*2
@@ -234,13 +237,15 @@ function Game:update(dt) -- runs every frame
   else
     deathTime = deathTime + dt
     if deathTime >= 2 then
-      love.audio.stop(musicSource)
+      
       Gamestate.switch(Kill)
     end
   end
 end
 
 function lose() 
+  love.audio.stop(musicSource)
+  love.audio.play(failMusicSource)
   death = true
 end
 
