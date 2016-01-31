@@ -105,6 +105,8 @@ function Game:enter(previous)
   minions.scale = Vector(1,1)
   localTime = 0.0
   completedLastMove = true
+  deathTime = 0.0
+  death = false
 end
 
 function new_lights()

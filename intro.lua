@@ -10,6 +10,8 @@ local things = {}
 local ready = false
 
 function Intro:init()
+  Score = 0 
+  
   background = {}
   background.img = love.graphics.newImage("images/cathedral.png")
 
@@ -21,6 +23,8 @@ function Intro:init()
 end
 
 function Intro:enter(previous)
+  Score = 0
+  
   love.audio.rewind(musicSource)
   love.audio.play(musicSource)
 
