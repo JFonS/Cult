@@ -30,7 +30,9 @@ function Kill:init()
 
   titleImg = love.graphics.newImage("images/title.png")
 
-  musicSource = love.audio.newSource( "music/randomnoise.wav")
+  --musicSource = love.audio.newSource( "music/randomnoise.wav")
+  musicSource = love.audio.newSource( "music/rnoise2.mp3")
+
   musicSource:setLooping(true)
 
 
