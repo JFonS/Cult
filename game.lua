@@ -63,7 +63,7 @@ function Game:init()
   local halfHandSize = Vector(jefe.hand.img:getWidth()/2,jefe.hand.img:getHeight()/2)
   mahand.pos = Vector(580, 450) * mahand.scale
   mahand.light = lightWorld.newLight(0, 0, 126, 175, 255, 800)
-  mahand.trail = trailmesh:new(love.mouse.getX(),love.mouse.getY(),blueFireImg,10,0.2,.01)
+  
 
   mahand.light.setGlowSize(0.0)
 
@@ -104,6 +104,9 @@ function Game:enter(previous)
   minions.pos = minions.originalPos:clone()
   minions.scale = Vector(1,1)
   localTime = 0.0
+  
+  mahand.trail = trailmesh:new(love.mouse.getX(),love.mouse.getY(),blueFireImg,10,0.2,.01)
+  
   completedLastMove = true
   deathTime = 0.0
   death = false
@@ -130,9 +133,9 @@ function hand_circle()
 
   local precision = 16
   local c = Vector(love.graphics.getWidth()/2, love.graphics.getHeight()/2)
-  local r = (handPositions.idle - c):len()/2
+  local r = (handPositions.idle - c):len()/3
 
-  local arcTime = (gameBeat - gameBeat/3)/(precision+0.2)
+  local arcTime = (gameBeat - gameBeat/3)/(precision*2)
 
   local offset = math.pi/2
   local nx = c.x + r * math.cos(offset)
@@ -197,6 +200,7 @@ function Game:update(dt) -- runs every frame
     --local move = part[beatIndex%4 + 1]
     if (beatIndex % (sequenceLen*2) < sequenceLen)  then
       if indexChanged then
+        local move = moves[math.random(1,5)]
         local move = moves[math.random(1,5)]
         print(move)
         if beatIndex%4 == 0 then currentSteps = {} end
