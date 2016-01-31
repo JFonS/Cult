@@ -86,6 +86,7 @@ end
 function game()
   Flux.to(things, 1.5, {blackAlpha = 255}):delay(0.2):oncomplete(function()
       musicSource:stop()
+      Score = 0
       Gamestate.switch(Game)
     end)
 end
