@@ -8,14 +8,12 @@ Game = require "game"
 Menu = require "menu"
 Intro = require "intro"
 Kill = require "kill"
---Game2 = require "game2"
 
 Score = 0
 
 function love.load()
     Gamestate.registerEvents()
     Gamestate.switch(Intro)
-    --Gamestate.switch(Game)
 
     love.mouse.setVisible(false)
     love.mouse.setGrabbed(true)
