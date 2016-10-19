@@ -1,18 +1,10 @@
 local Flux = require "lib/flux"
---local Vector = require "lib/vector"
---require "lib/swingers"
 
 local Kill = {} 
---local musicSource, localTime, background, offset, titleImg
 local localTime
 local imgactual
 local musicSource
 local things = {}
-
---local introTime = 8
---local titleTime = 5
---local things = {}
---local ready = false
 
 function Kill:init()
   background = {}
@@ -30,20 +22,13 @@ function Kill:init()
 
   titleImg = love.graphics.newImage("images/title.png")
 
-  --musicSource = love.audio.newSource( "music/randomnoise.wav")
   musicSource = love.audio.newSource( "music/rnoise2.mp3")
 
   musicSource:setLooping(true)
 
-
-  -- musicSource = love.audio.newSource( "music/level1.wav", "static")
-
-  -- musicSource:setLooping(true)
 end
 
 function Kill:enter(previous)
-  --love.audio.rewind(musicSource)
-  --love.audio.play(musicSource)
 
   localTime = 0.0
   imgactual = math.random(6)
@@ -52,7 +37,6 @@ function Kill:enter(previous)
 end
 
 function Kill:update(dt) -- runs every frame
-  --Flux.update(dt)
   localTime = localTime + dt
   Flux.update(dt)
   if localTime > 0.05 then
@@ -71,9 +55,7 @@ function Kill:draw()
   love.graphics.print("Score ",50, 600, 0, 1, 1, 1)
   love.graphics.setNewFont("fonts/Gypsy_Curse.ttf", 80)
   love.graphics.print(": "..Score, 230, 600, 0, 1, 1, 1)
-  --love.graphics.setColor(255,255,255,things.titleAlpha)
-  -- love.graphics.draw(titleImg, (love.graphics.getWidth()-titleImg:getWidth()*titleScale)/2, (love.graphics.getHeight()-titleImg:getHeight()*titleScale)/2,0,titleScale,titleScale)
-  love.graphics.setColor(0,0,0, things.blackAlpha)
+ love.graphics.setColor(0,0,0, things.blackAlpha)
   love.graphics.rectangle("fill", 0,0, love.graphics.getWidth(),love.graphics.getHeight())
 end
 
