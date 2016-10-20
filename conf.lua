@@ -4,7 +4,7 @@ function love.conf(t)
   t.console = false                   -- Attach a console (boolean, Windows only)
   t.gammacorrect = true              -- Enable gamma-correct rendering, when supported by the system (boolean)
 
-  t.window.title = "Gaem"         -- The window title (string)
+  t.window.title = "Cult"         -- The window title (string)
   t.window.icon = nil                 -- Filepath to an image to use as the window's icon (string)
   t.window.width = 1000                -- The window width (number)
   t.window.height = 700              -- The window height (number)
