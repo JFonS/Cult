@@ -14,7 +14,7 @@ end
 
 function Menu:draw()
     love.graphics.setColor(255,0,0)
-    love.graphics.rectangle("fill", 0,0,100,100)
+    love.graphics.rectangle("fill", 0,0,100,100) --I do not really remember what this does
     love.graphics.setColor(255,255,255)
 end
 
